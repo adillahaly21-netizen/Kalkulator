@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Sederhana</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: #edf2f7;
+      font-family: Arial, sans-serif;
+    }
+
+    .kalkulator {
+      width: 100%;
+      max-width: 360px;
+      padding: 20px;
+      background: #1e293b;
+      border-radius: 24px;
+      box-shadow: 0 12px 30px #0002;
+    }
+
+    h1 {
+      color: white;
+      font-size: 22px;
+      text-align: center;
+      margin: 0 0 18px;
+    }
+
+    #layar {
+      width: 100%;
+      height: 85px;
+      margin-bottom: 16px;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      background: #f8fafc;
+      color: #0f172a;
+      font-size: 32px;
+      text-align: right;
+      outline: none;
+    }
+
+    .tombol {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      min-width: 0;
+      height: 58px;
+      border: none;
+      border-radius: 12px;
+      background: #334155;
+      color: white;
+      font-size: 22px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:active {
+      transform: scale(0.96);
+      filter: brightness(1.2);
+    }
+
+    .operator {
+      background: #2563eb;
+    }
+
+    .hapus {
+      background: #dc2626;
+    }
+
+    .sama-dengan {
+      background: #16a34a;
+      grid-column: span 2;
+    }
+
+    .nol {
+      grid-column: span 2;
+    }
+
+    .catatan {
+      color: #cbd5e1;
+      text-align: center;
+      font-size: 12px;
+      margin: 16px 0 0;
+    }
+
+    @media (max-width: 400px) {
+      .kalkulator {
+        padding: 14px;
+      }
+
+      .tombol {
+        gap: 8px;
+      }
+
+      button {
+        height: 58px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="kalkulator">
+    <h1>Kalkulator</h1>
+
+    <input
+      id="layar"
+      type="text"
+      value="0"
+      readonly
+      aria-label="Layar kalkulator"
+    >
+
+    <div class="tombol">
+      <button class="hapus" onclick="bersihkan()">C</button>
+      <button class="hapus" onclick="hapusSatu()">⌫</button>
+      <button class="operator" onclick="pilihOperator('/')">÷</button>
+      <button class="operator" onclick="pilihOperator('*')">×</button>
+
+      <button onclick="masukkan('7')">7</button>
+      <button onclick="masukkan('8')">8</button>
+      <button onclick="masukkan('9')">9</button>
+      <button class="operator" onclick="pilihOperator('-')">−</button>
+
+      <button onclick="masukkan('4')">4</button>
+      <button onclick="masukkan('5')">5</button>
+      <button onclick="masukkan('6')">6</button>
+      <button class="operator" onclick="pilihOperator('+')">+</button>
+
+      <button onclick="masukkan('1')">1</button>
+      <button onclick="masukkan('2')">2</button>
+      <button onclick="masukkan('3')">3</button>
+      <button onclick="masukkan('.')">.</button>
+
+      <button class="nol" onclick="masukkan('0')">0</button>
+      <button class="sama-dengan" onclick="hitung()">=</button>
+    </div>
+
+    <p class="catatan">Kalkulator sederhana • Gratis • Offline</p>
+  </main>
+
+  <script>
+    const layar = document.getElementById("layar");
+
+    let angka = "0";
+    let angkaSebelumnya = null;
+    let operator = null;
+    let mulaiAngkaBaru = false;
+
+    function tampilkan() {
+      layar.value = angka;
+    }
+
+    function masukkan(nilai) {
+      if (nilai === ".") {
+        if (mulaiAngkaBaru) {
+          angka = "0.";
+          mulaiAngkaBaru = false;
+        } else if (!angka.includes(".")) {
+          angka += ".";
+        }
+      } else {
+        if (mulaiAngkaBaru || angka === "0") {
+          angka = nilai;
+          mulaiAngkaBaru = false;
+        } else if (angka.length < 16) {
+          angka += nilai;
+        }
+      }
+
+      tampilkan();
+    }
+
+    function pilihOperator(op) {
+      if (operator && !mulaiAngkaBaru) {
+        hitung();
+      }
+
+      angkaSebelumnya = Number(angka);
+      operator = op;
+      mulaiAngkaBaru = true;
+    }
+
+    function hitung() {
+      if (operator === null || angkaSebelumnya === null) {
+        return;
+      }
+
+      const a = angkaSebelumnya;
+      const b = Number(angka);
+      let hasil;
+
+      switch (operator) {
+        case "+":
+          hasil = a + b;
+          break;
+        case "-":
+          hasil = a - b;
+          break;
+        case "*":
+          hasil = a * b;
+          break;
+        case "/":
+          if (b === 0) {
+            angka = "Tidak bisa ÷ 0";
+            operator = null;
+            angkaSebelumnya = null;
+            mulaiAngkaBaru = true;
+            tampilkan();
+            return;
+          }
+          hasil = a / b;
+          break;
+      }
+
+      if (!Number.isFinite(hasil)) {
+        angka = "Hasil terlalu besar";
+      } else {
+        hasil = Number(hasil.toPrecision(12));
+        angka = String(hasil);
+      }
+
+      operator = null;
+      angkaSebelumnya = null;
+      mulaiAngkaBaru = true;
+      tampilkan();
+    }
+
+    function bersihkan() {
+      angka = "0";
+      angkaSebelumnya = null;
+      operator = null;
+      mulaiAngkaBaru = false;
+      tampilkan();
+    }
+
+    function hapusSatu() {
+      if (mulaiAngkaBaru) {
+        return;
+      }
+
+      if (angka.length > 1) {
+        angka = angka.slice(0, -1);
+
+        if (angka === "-" || angka === "") {
+          angka = "0";
+        }
+      } else {
+        angka = "0";
+      }
+
+      tampilkan();
+    }
+  </script>
+</body>
+</html>
